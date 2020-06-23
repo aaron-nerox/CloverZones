@@ -127,7 +127,7 @@ public class DecisionActivity extends AppCompatActivity {
         TextView title = dialogbox.findViewById(R.id.decider_title);
         TextView content = dialogbox.findViewById(R.id.decider_text_detail);
         fullname.setText(list.get(position).getUser().getName());
-        grade.setText(list.get(position).getUser().getEmail());
+        grade.setText(list.get(position).getUser().getGrade());
         title.setText(list.get(position).getTitle());
         content.setText(list.get(position).getContent());
         //setting the dialog content Here you add your values missoum according to the position of the card you click
@@ -137,8 +137,8 @@ public class DecisionActivity extends AppCompatActivity {
     }
 
     private void getDecicisions(){
-        mApiService.getDecisions(getWilaya()).enqueue(new Callback<ResponseDecisions>() {
-
+        String wilaya = getWilaya();
+        mApiService.getDecisions(wilaya).enqueue(new Callback<ResponseDecisions>() {
 
             @Override
             public void onResponse(Call<ResponseDecisions> call, Response<ResponseDecisions> response) {
@@ -151,7 +151,7 @@ public class DecisionActivity extends AppCompatActivity {
                     Log.d("missoum",response.body().getDecisions().toString());
 
                 }else {
-                    Toast.makeText(getApplicationContext(),"vfvf",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),response.message(),Toast.LENGTH_SHORT).show();
                 }
 
 
@@ -159,8 +159,7 @@ public class DecisionActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseDecisions> call, Throwable t) {
-                Toast.makeText(getApplicationContext(),"vfvf",Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(getApplicationContext(),"failed",Toast.LENGTH_SHORT).show();
             }
 
         });

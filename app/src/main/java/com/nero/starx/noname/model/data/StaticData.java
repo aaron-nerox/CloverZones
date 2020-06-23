@@ -2,8 +2,19 @@ package com.nero.starx.noname.model.data;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+
 
 public class StaticData {
+
+    public static String[] wilayaList= new String[]{"Blida"
+            ,"Oran"
+            , "Skikda"
+            , "Setif"
+            , "Tlemcen"
+            , "Alger"
+            , "Tizi ouzou"
+            , "Relizane"};
     //BLIDA
     public static LatLng blida1 = new LatLng(36.597296,3.085846);
     public static LatLng blida2 = new LatLng(36.590681,3.052887);

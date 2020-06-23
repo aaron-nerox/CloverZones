@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.nero.starx.noname.model.data.StaticData.wilayaList;
+
 public class MainViewModel {
 
     private SharedPreferences preferences;
@@ -105,7 +107,14 @@ public class MainViewModel {
         //String postalCode = addresses.get(0).getPostalCode();
         //String knownName = addresses.get(0).getFeatureName();
 
-        return state.substring(9);
+        for (String wilayaname: wilayaList) {
+            if(state.contains(wilayaname)){
+                state = wilayaname;
+                break;
+            }
+        }
+        Toast.makeText(context, state, Toast.LENGTH_SHORT).show();
+        return state;
     }
 
 }
