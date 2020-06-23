@@ -106,7 +106,6 @@ public class DecisionActivity extends AppCompatActivity {
     private void RefreshRecycler() {
         //refreshing decisions
         getDecicisions();
-        Toast.makeText(this, getWilaya(), Toast.LENGTH_SHORT).show();
     }
 
    OutletClickListener listener = this::ShowDeciderDetailes;
@@ -138,7 +137,7 @@ public class DecisionActivity extends AppCompatActivity {
     }
 
     private void getDecicisions(){
-        mApiService.getDecisions("relizane").enqueue(new Callback<ResponseDecisions>() {
+        mApiService.getDecisions(getWilaya()).enqueue(new Callback<ResponseDecisions>() {
 
 
             @Override
@@ -168,21 +167,11 @@ public class DecisionActivity extends AppCompatActivity {
     }
 
     private String getWilaya() {
-        Gson gson = new Gson();
         //get the current location
-        viewModel.getDeviceLocation(
+        return viewModel.getDeviceLocationName(
                 locationPermissionGranted ,
                 fusedLocationProviderClient,
                 this);
-        Double locationLongitude = gson.fromJson(preferences.getString("LONG" , "") , Double.class);
-        Double locationlatitude = gson.fromJson(preferences.getString("LAT" , "") , Double.class);
 
-        try {
-            Toast.makeText(this, viewModel.ReturnWilayaName(locationLongitude , locationlatitude , this), Toast.LENGTH_SHORT).show();
-            return viewModel.ReturnWilayaName(locationLongitude , locationlatitude , this);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "";
-        }
     }
 }

@@ -42,8 +42,7 @@ import retrofit2.Response;
 public class MainScreenActivity extends AppCompatActivity {
     private ActivityMainScreenBinding binding;
     BaseApiService mApiService;
-    private boolean locationPermissionGranted = false;
-    private final int  PERMISSIONS_REQUEST_ACCESS = 200;
+    private boolean locationPermissionGranted;
     private SharedPreferences preferences;
     int etat;
     private MainViewModel viewModel;
@@ -66,12 +65,12 @@ public class MainScreenActivity extends AppCompatActivity {
         setContentView(view);
 
         preferences = getSharedPreferences("DATA_STORE" , MODE_PRIVATE);
+        locationPermissionGranted = preferences.getBoolean("IS_PERMISSION_GRANTED" ,false);
         viewModel = new MainViewModel();
         locationPermissionGranted=true;
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        preferences.edit().putBoolean("IS_PERMISSION_GRANTED" , true).apply();
-        setPermission();
+
         initActivity();
         mApiService = UtilsApi.getAPIService();
 
@@ -85,25 +84,15 @@ public class MainScreenActivity extends AppCompatActivity {
         binding.logoutButton.setOnClickListener(v -> LogOut());
         binding.mapButton.setOnClickListener(v -> LaunchActivity(new Intent(MainScreenActivity.this , MapActivity.class)));
         binding.decisionButton.setOnClickListener(v -> LaunchActivity(new Intent(MainScreenActivity.this , DecisionActivity.class)));
-        binding.userState.setText(Etat("relizane"));
+        binding.userState.setText(Etat(getWilaya()));
     }
 
     private String getWilaya() {
-        Gson gson = new Gson();
         //get the current location
-        viewModel.getDeviceLocation(
+        return viewModel.getDeviceLocationName(
                 locationPermissionGranted ,
                 fusedLocationProviderClient,
                 this);
-        Double locationLongitude = gson.fromJson(preferences.getString("LONG" , "") , Double.class);
-        Double locationlatitude = gson.fromJson(preferences.getString("LAT" , "") , Double.class);
-
-        try {
-            return viewModel.ReturnWilayaName(locationLongitude , locationlatitude , this);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "";
-        }
     }
 
     private void LogOut() {
@@ -162,37 +151,6 @@ public class MainScreenActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-        }
-    }
-
-    private void setPermission() {
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            locationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        locationPermissionGranted = false;
-        if (requestCode == PERMISSIONS_REQUEST_ACCESS) {// If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                locationPermissionGranted = true;
-                preferences.edit().putBoolean("IS_PERMISSION_GRANTED" , true).apply();
-            }
         }
     }
 

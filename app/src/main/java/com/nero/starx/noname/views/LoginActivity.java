@@ -1,8 +1,13 @@
 package com.nero.starx.noname.views;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -31,6 +36,10 @@ public class LoginActivity extends AppCompatActivity {
     BaseApiService mApiService;
 
     private ActivityLoginBinding loginBinding;
+    private SharedPreferences preferences;
+    private boolean locationPermissionGranted;
+    private final int  PERMISSIONS_REQUEST_ACCESS = 200;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +52,11 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(view);
         mApiService = UtilsApi.getAPIService();
 
+        preferences = getSharedPreferences("DATA_STORE" , MODE_PRIVATE);
+        locationPermissionGranted = preferences.getBoolean("IS_PERMISSION_GRANTED" ,false);
+        if(!locationPermissionGranted)
+            setPermission();
+        else
         InitElements();
     }
 
@@ -65,8 +79,6 @@ public class LoginActivity extends AppCompatActivity {
         }else{
             Toast.makeText(this, "Remplir votre email et mot de pass et ressayer", Toast.LENGTH_SHORT).show();
         }
-        startActivity(new Intent(LoginActivity.this, MainScreenActivity.class));
-        finish();
 
     }
 
@@ -105,7 +117,39 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    private void setPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS);
+        }
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        locationPermissionGranted = false;
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS) {// If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                InitElements();
+                locationPermissionGranted = true;
+                preferences.edit().putBoolean("IS_PERMISSION_GRANTED" , true).apply();
+            }else{
+                finish();
+            }
+        }
+    }
 
 
 

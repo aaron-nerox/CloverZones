@@ -60,9 +60,10 @@ public class MainViewModel {
     }
 
 
-    public void getDeviceLocation(boolean permissionstate,
+
+    public String getDeviceLocationName(boolean permissionstate,
                                   FusedLocationProviderClient fusedLocationProviderClient, Activity activity) {
-        preferences= activity.getSharedPreferences("DATA_STORE" , Context.MODE_PRIVATE);
+        final String[] Wilayaname = {""};
         try {
             if (permissionstate) {
                 Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
@@ -72,8 +73,13 @@ public class MainViewModel {
                         Location lastKnownLocation = task.getResult();
                         Gson gson = new Gson();
                         if (lastKnownLocation != null) {
-                            preferences.edit().putString("LONG" ,gson.toJson(lastKnownLocation.getLongitude())).apply();
-                            preferences.edit().putString("LAT" ,gson.toJson(lastKnownLocation.getLatitude())).apply();
+                            try {
+                                Wilayaname[0] = ReturnWilayaName(lastKnownLocation.getLongitude()
+                                        , lastKnownLocation.getLatitude()
+                                        , activity.getApplicationContext());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     } else {
                         Toast.makeText(activity.getApplicationContext(), "Localisation invalable", Toast.LENGTH_SHORT).show();
@@ -83,6 +89,8 @@ public class MainViewModel {
         } catch (SecurityException e)  {
             Toast.makeText(activity.getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+
+        return Wilayaname[0];
     }
 
     public String ReturnWilayaName(Double longitud,Double Latitude,Context context) throws IOException {
@@ -90,15 +98,14 @@ public class MainViewModel {
         List<Address> addresses = new ArrayList<>();
         geocoder = new Geocoder(context, Locale.getDefault());
         String state;
-        addresses = geocoder.getFromLocation( Latitude,longitud, 5);
+        addresses = geocoder.getFromLocation( Latitude,longitud, 1);
         //String city = addresses.get(0).getLocality();
         state = addresses.get(0).getAdminArea();
         //String country = addresses.get(0).getCountryName();
         //String postalCode = addresses.get(0).getPostalCode();
         //String knownName = addresses.get(0).getFeatureName();
-        Log.d("state",state.toString());
 
-        return state;
+        return state.substring(9);
     }
 
 }
