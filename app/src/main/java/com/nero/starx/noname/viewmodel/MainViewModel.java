@@ -27,11 +27,11 @@ import static com.nero.starx.noname.model.data.StaticData.wilayaList;
 
 public class MainViewModel {
 
-    private SharedPreferences preferences;
+
 
     public void getDeviceLocation(GoogleMap googleMapCore, boolean permissionstate,
                                FusedLocationProviderClient fusedLocationProviderClient, Activity activity) {
-        preferences= activity.getSharedPreferences("DATA_STORE" , Context.MODE_PRIVATE);
+        SharedPreferences preferences= activity.getSharedPreferences("DATA_STORE" , Context.MODE_PRIVATE);
         try {
             if (permissionstate) {
                 Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
@@ -63,58 +63,57 @@ public class MainViewModel {
 
 
 
-    public String getDeviceLocationName(boolean permissionstate,
+    public void getDeviceLocationName(boolean permissionstate,
                                   FusedLocationProviderClient fusedLocationProviderClient, Activity activity) {
-        final String[] Wilayaname = {""};
+
         try {
             if (permissionstate) {
                 Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(activity, (OnCompleteListener<Location>) task -> {
+                locationResult.addOnCompleteListener(activity, task -> {
                     if (task.isSuccessful()) {
+                        String x;
                         // Set the map's camera position to the current location of the device.
                         Location lastKnownLocation = task.getResult();
-                        Gson gson = new Gson();
                         if (lastKnownLocation != null) {
                             try {
-                                Wilayaname[0] = ReturnWilayaName(lastKnownLocation.getLongitude()
+                                ReturnWilayaName(lastKnownLocation.getLongitude()
                                         , lastKnownLocation.getLatitude()
                                         , activity.getApplicationContext());
+
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+
                         }
                     } else {
                         Toast.makeText(activity.getApplicationContext(), "Localisation invalable", Toast.LENGTH_SHORT).show();
                     }
+
                 });
             }
         } catch (SecurityException e)  {
             Toast.makeText(activity.getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-
-        return Wilayaname[0];
     }
 
-    public String ReturnWilayaName(Double longitud,Double Latitude,Context context) throws IOException {
+    public void ReturnWilayaName(Double longitud,Double Latitude,Context context) throws IOException {
         Geocoder geocoder;
         List<Address> addresses = new ArrayList<>();
         geocoder = new Geocoder(context, Locale.getDefault());
-        String state;
         addresses = geocoder.getFromLocation( Latitude,longitud, 1);
         //String city = addresses.get(0).getLocality();
-        state = addresses.get(0).getAdminArea();
+        String state = addresses.get(0).getAdminArea();
         //String country = addresses.get(0).getCountryName();
         //String postalCode = addresses.get(0).getPostalCode();
         //String knownName = addresses.get(0).getFeatureName();
 
         for (String wilayaname: wilayaList) {
             if(state.contains(wilayaname)){
-                state = wilayaname;
-                break;
+                SharedPreferences preferences = context.getSharedPreferences("DATA_STORE" , Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("WILAYA" , wilayaname).apply();
             }
         }
-        Toast.makeText(context, state, Toast.LENGTH_SHORT).show();
-        return state;
     }
 
 }

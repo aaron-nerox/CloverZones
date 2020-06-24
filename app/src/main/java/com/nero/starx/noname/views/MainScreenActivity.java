@@ -89,10 +89,12 @@ public class MainScreenActivity extends AppCompatActivity {
 
     private String getWilaya() {
         //get the current location
-        return viewModel.getDeviceLocationName(
+        viewModel.getDeviceLocationName(
                 locationPermissionGranted ,
                 fusedLocationProviderClient,
                 this);
+
+        return preferences.getString("WILAYA" , "");
     }
 
     private void LogOut() {
